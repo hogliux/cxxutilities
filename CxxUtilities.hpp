@@ -108,4 +108,24 @@ template <typename... Args> auto range(Args... args) noexcept { return Range<dec
 // TODO: There may be a more performant version of this where we multiply with the sign of dir 
 // then ceil and then multiply with the sign of dir again
 template <typename T> T dround(T const x, T const dir) noexcept { return dir >= static_cast<T>(0) ? std::ceil(x) : std::floor(x); }
+
+//====================================================================
+/** Create a reference counted singleton object */
+template <typename Fn, typename... Args>
+auto getOrCreate(Fn && factory, Args&&... args) {
+    // here we use CTAD to help us deduce the pointer's type
+    using Type = typename decltype(std::shared_ptr(factory(std::forward<Args>(args)...)))::element_type;
+    std::shared_ptr<Type> _shared;
+    static std::weak_ptr<Type> _weak = std::invoke([&_shared, factory] (Args&&... _args) {
+        _shared = std::shared_ptr<Type>(factory(std::forward<Args>(_args)...));
+        return _shared;
+    }, std::forward<Args>(args)...);
+
+    if (auto ptr = _weak.lock())
+        return ptr;
+
+    _shared = std::shared_ptr<Type>(factory(std::forward<Args>(args)...));
+    _weak = _shared;
+    return _shared;
+}
 }
