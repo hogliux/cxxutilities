@@ -6,8 +6,8 @@
 //  Copyright © 2022 Fielding DSP GmbH, All rights reserved.
 //
 //  Fielding DSP GmbH
-//  Bessemerstr. 80, 10 OG Süd
-//  12103 Berlin, Germany
+//  Jägerstr. 36
+//  14467 Potsdam, Germany
 //
 #pragma once
 #include <optional>
