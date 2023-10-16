@@ -128,4 +128,23 @@ auto getOrCreate(Fn && factory, Args&&... args) {
     _weak = _shared;
     return _shared;
 }
+
+//====================================================================
+// A wrapper for C++-23's bit_cast for older versions of C++
+template <typename T, typename U>
+std::enable_if_t<sizeof(T) == sizeof(U) && std::is_trivially_copyable_v<U> && std::is_trivially_copyable_v<T>, T>
+bit_cast(const U& src) noexcept
+{
+   #if defined(__cpp_lib_bit_cast) && __cplusplus >= __cpp_lib_bit_cast
+    return std::bit_cast<T>(src);
+   #else
+    static_assert(std::is_trivially_constructible_v<T>,
+        "This implementation additionally requires "
+        "destination type to be trivially constructible");
+ 
+    To dst;
+    std::memcpy(&dst, &src, sizeof(T));
+    return dst;
+   #endif
+}
 }
