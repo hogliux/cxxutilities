@@ -17,6 +17,7 @@
 #include <memory>
 #include <functional>
 #include <mutex>
+#include <type_traits>
 
 namespace cxxutils {
 namespace detail {
@@ -189,4 +190,21 @@ private:
     std::unique_lock<M>& lock;
     bool unlocked = false;
 };
+
+//====================================================================
+template<typename T>
+constexpr std::enable_if_t<std::is_integral_v<T>, T> byteswap(T value) noexcept {
+   #if defined(__cpp_lib_byteswap) && __cplusplus >= __cpp_lib_byteswap
+    return std::byteswap<T>(src);
+   #else
+    static_assert(std::has_unique_object_representations_v<T>,  "T may not have padding bits");
+    auto byte_representation = std::bit_cast<std::array<std::byte, sizeof(T)>>(value);
+    auto const reverse_byte_representation = std::invoke([&byte_representation] () {
+        std::array<std::byte, sizeof(T)> result;
+        std::copy(byte_representation.rbegin(), byte_representation.rend(), result.begin());
+        return result;
+    });
+    return std::bit_cast<T>(reverse_byte_representation);
+   #endif
+}
 }
