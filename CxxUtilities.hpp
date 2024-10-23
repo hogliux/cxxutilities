@@ -16,6 +16,7 @@
 #include <cmath>
 #include <memory>
 #include <functional>
+#include <mutex>
 
 namespace cxxutils {
 namespace detail {
@@ -147,4 +148,45 @@ bit_cast(const U& src) noexcept
     return dst;
    #endif
 }
+
+//====================================================================
+// Inspired by boosts reverse-lock but also works with STL std::unique_lock
+template <typename M>
+class reverse_lock
+{
+public:
+    explicit reverse_lock(std::unique_lock<M>& _lock) : lock(_lock) {
+        if (lock.owns_lock()) {
+            lock.unlock();
+            unlocked = true;
+        }
+    }
+
+    reverse_lock(const reverse_lock&) = delete;
+    reverse_lock& operator=(const reverse_lock&) = delete;
+    reverse_lock(reverse_lock&& other) noexcept : lock(other.lock), unlocked(other.unlocked) { other.unlocked_= false; }
+
+    reverse_lock& operator=(reverse_lock&& other) noexcept
+    {
+        if (this != &other) {
+            if (unlocked) {
+                lock.lock(); // Re-lock if currently unlocked
+                unlocked = false;
+            }
+            lock = other.lock;
+            std::swap(unlocked, other.unlocked);
+        }
+        return *this;
+    }
+
+    ~reverse_lock() {
+        if (unlocked) {
+            lock.lock();
+        }
+    }
+
+private:
+    std::unique_lock<M>& lock;
+    bool unlocked = false;
+};
 }
