@@ -116,7 +116,8 @@ template <typename T> T dround(T const x, T const dir) noexcept { return dir >= 
 template <typename Fn, typename... Args>
 auto getOrCreate(Fn && factory, Args&&... args) {
     // here we use CTAD to help us deduce the pointer's type
-    using Type = typename decltype(std::shared_ptr(factory(std::forward<Args>(args)...)))::element_type;
+    using PointerType = std::remove_reference_t<std::remove_cv_t<std::invoke_result_t<Fn, Args...>>>;
+    using Type = std::pointer_traits<PointerType>::element_type;
     std::shared_ptr<Type> _shared;
     static std::weak_ptr<Type> _weak = std::invoke([&_shared, factory] (Args&&... _args) {
         _shared = std::shared_ptr<Type>(factory(std::forward<Args>(_args)...));
