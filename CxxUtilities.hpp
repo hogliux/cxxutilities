@@ -19,6 +19,14 @@
 #include <mutex>
 #include <type_traits>
 
+// see https://gcc.gnu.org/onlinedocs/cpp/_005f_005fhas_005finclude.html
+#if defined __has_include
+#  if __has_include (<bit>)
+#    include <bit>
+#  endif
+#endif
+
+
 namespace cxxutils {
 namespace detail {
 
@@ -196,7 +204,7 @@ private:
 template<typename T>
 constexpr std::enable_if_t<std::is_integral_v<T>, T> byteswap(T value) noexcept {
    #if defined(__cpp_lib_byteswap) && __cplusplus >= __cpp_lib_byteswap
-    return std::byteswap<T>(src);
+    return std::byteswap<T>(value);
    #else
     static_assert(std::has_unique_object_representations_v<T>,  "T may not have padding bits");
     auto byte_representation = std::bit_cast<std::array<std::byte, sizeof(T)>>(value);
