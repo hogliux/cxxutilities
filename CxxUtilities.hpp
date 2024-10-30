@@ -77,6 +77,7 @@ auto invoke_with_sequence(std::integer_sequence<Tp, Ips...>, F && lambda) {
 //====================================================================
 template <typename> struct Arg0 {};
 template <typename T> struct Arg0<void (*)(T)> { using type = T; };
+template <typename T> struct Arg0<void (*)(T) noexcept> { using type = T; };
 template <auto FuncPtr> struct Releaser { void operator()(typename Arg0<decltype(FuncPtr)>::type p) { if (p != nullptr) FuncPtr(p); } };
 
 //====================================================================
