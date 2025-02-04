@@ -175,7 +175,7 @@ public:
 
     reverse_lock(const reverse_lock&) = delete;
     reverse_lock& operator=(const reverse_lock&) = delete;
-    reverse_lock(reverse_lock&& other) noexcept : lock(other.lock), unlocked(other.unlocked) { other.unlocked_= false; }
+    reverse_lock(reverse_lock&& other) noexcept : lock(other.lock), unlocked(other.unlocked) { other.unlocked = false; }
 
     reverse_lock& operator=(reverse_lock&& other) noexcept
     {
