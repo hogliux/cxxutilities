@@ -96,6 +96,17 @@ template <typename T, typename Lambda>
 auto callAtEndOfScope(T what, Lambda && lambda) { return ScopedReleaser<T, Lambda>(what, std::move(lambda)); }
 
 //====================================================================
+template <typename T>
+struct ScopedSetter {
+    ScopedSetter(T& what, T  const& newValue) : value(what), previous(what) { what = newValue; }
+    ScopedSetter(T& what, T  &&     newValue) : value(what), previous(what) { what = std::move(newValue); }
+    ~ScopedSetter() { value = std::move(previous); }
+private:
+    T& value;
+    T previous;
+};
+
+//====================================================================
 // This works well for samples as they are (usually) between -1 and 1
 // This is not a good solution for floats with higher order of magnitudes
 // where epsilon would need to be scaled.
