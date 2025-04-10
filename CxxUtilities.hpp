@@ -84,11 +84,11 @@ template <auto FuncPtr> struct Releaser { void operator()(typename Arg0<decltype
 template <typename T, typename Lambda>
 struct ScopedReleaser {
     ScopedReleaser(T _what, Lambda && _lambda) : what(_what), lambda(std::move(_lambda)) {}
-    ~ScopedReleaser() { lambda(what); }
-    T get()      { return what; }
-    operator T() { return what; }
+    ~ScopedReleaser() { if (what.has_value()) lambda(*what); }
+    T get()      { return *what; }
+    operator T() { return *what; }
 private:
-    T what;
+    std::optional<T> what;
     Lambda lambda;
 };
 
