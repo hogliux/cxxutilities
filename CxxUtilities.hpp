@@ -84,7 +84,11 @@ template <auto FuncPtr> struct Releaser { void operator()(typename Arg0<decltype
 template <typename T, typename Lambda>
 struct ScopedReleaser {
     ScopedReleaser(T _what, Lambda && _lambda) : what(_what), lambda(std::move(_lambda)) {}
+    ScopedReleaser(ScopedReleaser&& o) : what(std::move(o.what)), lambda(std::move(o.lambda)) { o.what = {}; }
+    ScopedReleaser(ScopedReleaser const&) = delete;
     ~ScopedReleaser() { if (what.has_value()) lambda(*what); }
+    ScopedReleaser& operator=(ScopedReleaser && o) { what = std::move(o.what); lambda = std::move(o.lambda); o.what = {}; return *this; }
+    ScopedReleaser& operator=(ScopedReleaser const&) = delete;
     T get()      { return *what; }
     operator T() { return *what; }
 private:
