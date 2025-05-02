@@ -181,7 +181,7 @@ template <typename M>
 class reverse_lock
 {
 public:
-    explicit reverse_lock(std::unique_lock<M>& _lock) : lock(_lock) {
+    explicit reverse_lock(M& _lock) : lock(_lock) {
         if (lock.owns_lock()) {
             lock.unlock();
             unlocked = true;
@@ -212,7 +212,7 @@ public:
     }
 
 private:
-    std::unique_lock<M>& lock;
+    M& lock;
     bool unlocked = false;
 };
 
