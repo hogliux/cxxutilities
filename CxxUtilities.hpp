@@ -235,4 +235,19 @@ constexpr std::enable_if_t<std::is_integral_v<T>, T> byteswap(T value) noexcept 
     return std::bit_cast<T>(reverse_byte_representation);
    #endif
 }
+
+//====================================================================
+// A useful class to drop-in to classes that only want to use atomics
+// depending on template arguments
+template <typename T>
+struct DummyAtomics
+{
+    DummyAtomics() noexcept = default;
+    DummyAtomics(T v) noexcept : x(v) {}
+    ~DummyAtomics() noexcept = default;
+    void store(T v, std::memory_order = std::memory_order::seq_cst) noexcept { x = v; }
+    T load(std::memory_order = std::memory_order::seq_cst) const noexcept { return x; }
+private:
+    T x;
+};
 }
