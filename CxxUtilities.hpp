@@ -111,6 +111,15 @@ private:
 };
 
 //====================================================================
+// Combines multiple lambda types into a single callable object
+template<typename ...L>
+struct multilambda : L... 
+{
+    using L::operator()...;
+    constexpr multilambda(L...lambda) : L(std::move(lambda))... {}
+};
+
+//====================================================================
 // This works well for samples as they are (usually) between -1 and 1
 // This is not a good solution for floats with higher order of magnitudes
 // where epsilon would need to be scaled.
